@@ -195,7 +195,7 @@ public class RichTextEntity
 	 * Set value of Policy
 	 * @param policy
 	 */
-	public final communitycommons.proxies.XSSPolicy getPolicy()
+	public final com.mendix.communitycommons.proxies.XSSPolicy getPolicy()
 	{
 		return getPolicy(getContext());
 	}
@@ -204,20 +204,20 @@ public class RichTextEntity
 	 * @param context
 	 * @return value of Policy
 	 */
-	public final communitycommons.proxies.XSSPolicy getPolicy(com.mendix.systemwideinterfaces.core.IContext context)
+	public final com.mendix.communitycommons.proxies.XSSPolicy getPolicy(com.mendix.systemwideinterfaces.core.IContext context)
 	{
 		Object obj = getMendixObject().getValue(context, MemberNames.Policy.toString());
 		if (obj == null)
 			return null;
 
-		return communitycommons.proxies.XSSPolicy.valueOf((java.lang.String) obj);
+		return com.mendix.communitycommons.proxies.XSSPolicy.valueOf((java.lang.String) obj);
 	}
 
 	/**
 	 * Set value of Policy
 	 * @param policy
 	 */
-	public final void setPolicy(communitycommons.proxies.XSSPolicy policy)
+	public final void setPolicy(com.mendix.communitycommons.proxies.XSSPolicy policy)
 	{
 		setPolicy(getContext(), policy);
 	}
@@ -227,7 +227,7 @@ public class RichTextEntity
 	 * @param context
 	 * @param policy
 	 */
-	public final void setPolicy(com.mendix.systemwideinterfaces.core.IContext context, communitycommons.proxies.XSSPolicy policy)
+	public final void setPolicy(com.mendix.systemwideinterfaces.core.IContext context, com.mendix.communitycommons.proxies.XSSPolicy policy)
 	{
 		if (policy != null)
 			getMendixObject().setValue(context, MemberNames.Policy.toString(), policy.toString());
