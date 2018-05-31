@@ -195,8 +195,12 @@ shadowJar {
 
     dependencies {
         exclude 'com/mendix/**'
+	exclude 'communitycommons/**'
+	exclude 'myfirstmodule/**'
         exclude 'biz/aQute/**'
         exclude '**/proxies/**'
         exclude '**/system/**'
     }
+    
+    mergeServiceFiles()
 }
