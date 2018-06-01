@@ -19,10 +19,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.pdfbox.multipdf.Overlay;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import cc_org.apache.commons.io.IOUtils;
+import cc_org.apache.pdfbox.multipdf.Overlay;
+import cc_org.apache.pdfbox.pdmodel.PDDocument;
+import cc_org.apache.pdfbox.multipdf.PDFMergerUtility;
 
 import system.proxies.FileDocument;
 import system.proxies.Language;
@@ -134,7 +134,7 @@ public class Misc {
 			try ( 
 				OutputStream os = conn.getOutputStream()
 			) {
-				IOUtils.copy(new ByteArrayInputStream(postdata.getBytes("UTF-8")), os);
+				IOUtils.copy(new ByteArrayInputStream(postdata.getBytes(StandardCharsets.UTF_8)), os);
 			}
         }
 	
@@ -143,7 +143,7 @@ public class Misc {
 			InputStream is = conn.getInputStream()
 		) {
 			// Get the response
-			result = new String(IOUtils.toString(is, StandardCharsets.UTF_8));
+			result = IOUtils.toString(is, StandardCharsets.UTF_8);
 		}
 		
         return result;

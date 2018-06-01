@@ -39,8 +39,9 @@ project.ext {
 group 'com.mendix.communitycommons'
 version CC_VERSION
 
-def runtimeLibs = "$buildDir/runtime/bundles"
-def userLibDir  = "$projectDir/src/CommunityCommons/userlib"
+def runtimeLibs   = "$buildDir/runtime/bundles"
+def userLibDir    = "$projectDir/src/CommunityCommons/userlib"
+def javasourceDir = "$projectDir/src/CommunityCommons/javasource"
 
 configurations {
     tar
@@ -64,15 +65,16 @@ dependencies {
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'org.apache.pdfbox', name: 'pdfbox-app', version: '2.0.8'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    runtime group: 'xalan', name: 'xalan', version: '2.7.2'
     compileOnly fileTree(dir: "$runtimeLibs")
 
     tar "runtime:mxbuild:${project.MXBUILD_VERSION}@tar.gz"
 }
 
-sourceSets {
+sourceSets { // might be redundant, src/main and src/test should be default
     main {
         java {
-            srcDirs = ["src/CommunityCommons/javasource"]
+            srcDirs = ["src/main/java"]
         }
         resources {
             srcDirs = ["src/CommunityCommons/resources"]
@@ -80,12 +82,12 @@ sourceSets {
     }
     test {
         java {
-            srcDirs = ["src/CommunityCommons/test"]
+            srcDirs = ["src/test/java"]
         }
     }
 }
 
-task copyToUserlib( type: Copy ) {
+task copyDependenciesToUserlib( type: Copy ) {
     dependsOn 'shadowJar'
 
     into userLibDir
@@ -95,6 +97,18 @@ task copyToUserlib( type: Copy ) {
     //        requiredLibFlag.write ''
     //    }
     from "$buildDir/libs"
+}
+
+task copyJavasource( type: Copy ) {
+    
+    from 'src/main/java' 
+    
+    filter { line -> 
+	line.replaceAll('org.apache', 'cc_org.apache')
+	    .replaceAll('org.owasp', 'cc_org.owasp')
+    }
+
+    into javasourceDir     
 }
 
 task untarMxbuild( type: Copy ) {
@@ -133,11 +147,12 @@ distZip {
 task fullDist {
     // TODO: Instead of zipping CommunityCommons.mpr we should extract the CC module as project.mpr and zip that instead!
     //    Work on that is done in branch 'readModuleFromMpr'
-    dependsOn 'clean', 'copyToUserlib', 'untarMxbuild', 'packageXML', 'distZip'
+    dependsOn 'clean', 'copyDependenciesToUserlib', 'copyJavasource', 'untarMxbuild', 'packageXML', 'distZip'
 }
 
 clean {
     delete "$projectDir/src/CommunityCommons/userlib"
+    delete "$projectDir/src/CommunityCommons/javasource"
     delete "$projectDir/package.xml"
 }
 
@@ -179,8 +194,9 @@ task packageXML {
     }
 
     tasks.distZip.shouldRunAfter tasks.packageXML
-    tasks.packageXML.shouldRunAfter tasks.copyToUserlib
-    tasks.copyToUserlib.shouldRunAfter tasks.untarMxbuild
+    tasks.packageXML.shouldRunAfter tasks.copyDependenciesToUserlib
+    tasks.copyDependenciesToUserlib.shouldRunAfter tasks.untarMxbuild
+    tasks.copyJavasource.shouldRunAfter tasks.copyDependenciesToUserlib
 }
 
 shadowJar {
@@ -191,7 +207,7 @@ shadowJar {
     relocate('org.owasp', 'cc_org.owasp')
     relocate('org.w3c', 'cc_org.w3c')
     relocate('org.xml', 'cc_org.xml')
-    relocate('javax', 'cc_javax')
+    relocate('javax.xml', 'cc_javax.xml')
 
     dependencies {
         exclude 'com/mendix/**'

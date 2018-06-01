@@ -25,12 +25,12 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.owasp.validator.html.AntiSamy;
-import org.owasp.validator.html.CleanResults;
-import org.owasp.validator.html.Policy;
+import cc_org.apache.commons.io.IOUtils;
+import cc_org.apache.commons.lang3.RandomStringUtils;
+import cc_org.apache.commons.lang3.StringEscapeUtils;
+import cc_org.owasp.validator.html.AntiSamy;
+import cc_org.owasp.validator.html.CleanResults;
+import cc_org.owasp.validator.html.Policy;
 
 import com.mendix.core.Core;
 import com.mendix.systemwideinterfaces.MendixRuntimeException;
@@ -84,17 +84,17 @@ public class StringUtils
 	public static String leftPad(String value, Long amount, String fillCharacter)
 	{
 		if (fillCharacter == null || fillCharacter.length() == 0) {
-			return org.apache.commons.lang3.StringUtils.leftPad(value, amount.intValue(), " ");
+			return cc_org.apache.commons.lang3.StringUtils.leftPad(value, amount.intValue(), " ");
 		}
-		return org.apache.commons.lang3.StringUtils.leftPad(value, amount.intValue(), fillCharacter);
+		return cc_org.apache.commons.lang3.StringUtils.leftPad(value, amount.intValue(), fillCharacter);
 	}
 
 	public static String rightPad(String value, Long amount, String fillCharacter)
 	{
 		if (fillCharacter == null || fillCharacter.length() == 0) {
-			return org.apache.commons.lang3.StringUtils.rightPad(value, amount.intValue(), " ");
+			return cc_org.apache.commons.lang3.StringUtils.rightPad(value, amount.intValue(), " ");
 		}
-		return org.apache.commons.lang3.StringUtils.rightPad(value, amount.intValue(), fillCharacter);
+		return cc_org.apache.commons.lang3.StringUtils.rightPad(value, amount.intValue(), fillCharacter);
 	}
 
 	public static String randomString(int length)
@@ -404,18 +404,18 @@ public class StringUtils
 	}
 
 	public static String substringBefore(String str, String separator) {
-		return org.apache.commons.lang3.StringUtils.substringBefore(str, separator);
+		return cc_org.apache.commons.lang3.StringUtils.substringBefore(str, separator);
 	}
 
 	public static String substringBeforeLast(String str, String separator) {
-		return org.apache.commons.lang3.StringUtils.substringBeforeLast(str, separator);
+		return cc_org.apache.commons.lang3.StringUtils.substringBeforeLast(str, separator);
 	}
 
 	public static String substringAfter(String str, String separator) {
-		return org.apache.commons.lang3.StringUtils.substringAfter(str, separator);
+		return cc_org.apache.commons.lang3.StringUtils.substringAfter(str, separator);
 	}
 
 	public static String substringAfterLast(String str, String separator) {
-		return org.apache.commons.lang3.StringUtils.substringAfterLast(str, separator);
+		return cc_org.apache.commons.lang3.StringUtils.substringAfterLast(str, separator);
 	}
 }
