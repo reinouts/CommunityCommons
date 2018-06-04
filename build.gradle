@@ -9,14 +9,6 @@ import groovy.xml.XmlUtil
 import org.gradle.api.internal.file.copy.CopySpecInternal
 
 project.ext {
-    PACKAGEXML_TEMPLATE = '''<?xml version="1.0" encoding="utf-8" ?>
-    <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mendix.com/package/1.0/">
-        <modelerProject xmlns="http://www.mendix.com/modelerProject/1.0/">
-            <module name="''' + "${project.name}" + '''" />
-            <projectFile path="project.mpr" />
-            <files/>
-        </modelerProject>
-    </package>'''
 
     CC_VERSION = '7.2.0'
     MXBUILD_VERSION = '7.1.0'
@@ -42,10 +34,12 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile fileTree(dir: "$runtimeLibs")
-    compile group: 'org.owasp.antisamy', name: 'antisamy', version: '1.5.3'
+//    compile group: 'org.owasp.antisamy', name: 'antisamy', version: '1.5.3'
+    compile group: 'com.googlecode.owasp-java-html-sanitizer', name: 'owasp-java-html-sanitizer', version: '20180219.1'
     compile group: 'commons-io', name: 'commons-io', version: '2.6'
     compile group: 'org.apache.pdfbox', name: 'pdfbox-app', version: '2.0.8'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+//    runtime group: 'xalan', name: 'xalan', version: '2.7.2'
     compileOnly fileTree(dir: "$runtimeLibs")
 
     tar "runtime:mxbuild:${project.MXBUILD_VERSION}@tar.gz"
@@ -76,84 +70,23 @@ task copyToUserlib( type: Copy ) {
     }
 }
 
-task untarMxbuild( type: Copy ) {
-    //TODO: don't re-download if bundles directory exists
+task untarMxbuild( type: Copy ) {    
     configurations.tar.findAll{it.name.endsWith('tar.gz')}.each {
         from tarTree(resources.gzip(it))
         into buildDir
-        include('**/runtime/bundles/*')
+        include('**/runtime/bundles/com.mendix.public-api.jar')
+	include('**/runtime/bundles/com.mendix.logging-api.jar')
+	include('**/runtime/bundles/biz.aQute.bnd.bndlib.jar')
         includeEmptyDirs = false
     }
 }
 
-distributions {
-    main {
-        baseName = 'CommunityCommons'
-        contents {
-            into('/') {
-                from 'src/CommunityCommons'
-                exclude('**/proxies/*')
-                exclude('**/system/*')
-            }
-            into('/') {
-                from 'package.xml'
-            }
-        }
-    }
-}
-
-distZip {
-    archiveName "$baseName-${project.CC_VERSION}" + ".mpk"
-}
-
-
-task fullDist {
-    dependsOn 'clean', 'copyToUserlib', 'untarMxbuild', 'packageXML', 'distZip'
+task prepareDeps {
+    dependsOn 'clean', 'copyToUserlib', 'untarMxbuild'
 }
 
 clean {
     delete "$projectDir/src/CommunityCommons/userlib"
-    delete "$projectDir/package.xml"
 }
 
-task packageXML {
-    ext.interpolateFileElementXML = { resource ->
-        return "<file path=\"${resource}\" />"
-    }
-
-    ext.buildRelativePath = { fileEntry, directory ->
-        return (fileEntry.absolutePath - directory.absolutePath).replace("/", "\\").substring(1)
-    }
-
-    ext.getResources = {
-        def list = []
-        def userLibDirectory = file(userLibDir)
-
-        def distributionCopySpec = distributions.main.contents.buildRootResolver().allSource
-
-        distributionCopySpec.each { f ->
-            list << interpolateFileElementXML(
-                buildRelativePath(f, file("$projectDir/src/CommunityCommons"))
-            )
-        }
-
-        return list
-    }
-
-    doLast {
-        def packageXMLResources = getResources()
-        def packageXML = new XmlParser().parseText(project.PACKAGEXML_TEMPLATE)
-
-        packageXMLResources.each { resource ->
-            def resourceXML = new XmlParser().parseText(resource)
-            packageXML.modelerProject.files[0].append(resourceXML)
-        }
-
-        String out = XmlUtil.serialize( packageXML )
-        new File("$projectDir/package.xml").write(out)
-    }
-
-    tasks.distZip.shouldRunAfter tasks.packageXML
-    tasks.untarMxbuild.shouldRunAfter tasks.copyToUserlib
-    tasks.packageXML.shouldRunAfter tasks.untarMxbuild
-}
+tasks.untarMxbuild.shouldRunAfter tasks.copyToUserlib
