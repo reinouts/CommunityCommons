@@ -1,5 +1,4 @@
 deployment
-/releases
 /.settings
 *.launch
 .classpath
@@ -29,8 +28,10 @@ src/releases
 src/javasource/system/actions/VerifyPassword.java
 src/javasource/system/UserActionsRegistrar.java
 /.nb-gradle/
-/.gradle/
+.gradle/
 /build/
 private/cache/retriever/catalog.xml
 package.xml
 /src/CommunityCommons/userlib/
+*.mda
+/nbproject/

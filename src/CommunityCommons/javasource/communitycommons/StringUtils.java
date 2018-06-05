@@ -1,7 +1,7 @@
 package communitycommons;
 
+import com.google.common.collect.ImmutableMap;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -27,23 +27,39 @@ import javax.swing.text.html.parser.ParserDelegator;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.owasp.validator.html.AntiSamy;
-import org.owasp.validator.html.CleanResults;
-import org.owasp.validator.html.Policy;
 
 import com.mendix.core.Core;
 import com.mendix.systemwideinterfaces.MendixRuntimeException;
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.systemwideinterfaces.core.IMendixObject;
 
-import communitycommons.proxies.XSSPolicy;
+import communitycommons.proxies.SanitizerPolicy;
+import static communitycommons.proxies.SanitizerPolicy.BLOCKS;
+import static communitycommons.proxies.SanitizerPolicy.FORMATTING;
+import static communitycommons.proxies.SanitizerPolicy.IMAGES;
+import static communitycommons.proxies.SanitizerPolicy.LINKS;
+import static communitycommons.proxies.SanitizerPolicy.STYLES;
+import static communitycommons.proxies.SanitizerPolicy.TABLES;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 import system.proxies.FileDocument;
 
 public class StringUtils
 {
+
+	static final Map<String, PolicyFactory> SANITIZER_POLICIES = new ImmutableMap.Builder<String, PolicyFactory>()
+		.put(BLOCKS.name(), Sanitizers.BLOCKS)
+		.put(FORMATTING.name(), Sanitizers.FORMATTING)
+		.put(IMAGES.name(), Sanitizers.IMAGES)
+		.put(LINKS.name(), Sanitizers.LINKS)
+		.put(STYLES.name(), Sanitizers.STYLES)
+		.put(TABLES.name(), Sanitizers.TABLES)
+		.build();
 
 	public static final String	HASH_ALGORITHM	= "SHA-256";
 
@@ -260,38 +276,6 @@ public class StringUtils
     return result.toString();
 	}
 
-	public static String XSSSanitize(String html, XSSPolicy policy)
-			throws Exception {
-		if (html == null)
-			return "";
-		// return HtmlSanitizer.sanitize(html);
-		String policyString = policy == null ? "tinymce" : policy.toString()
-				.toLowerCase();
-		return XSSSanitize(html, policyString);
-	}
-
-	public static String XSSSanitize(String html, String policyString)
-			throws Exception {
-		if (html == null)
-			return "";
-		if (policyString == null)
-			throw new Exception("Unable to perform XSS sanitization: policyString is null");
-
-		String filename = Core.getConfiguration().getResourcesPath() + File.separator
-				+ "communitycommons" + File.separator + "antisamy"
-				+ File.separator + "antisamy-" + policyString + "-1.4.4.xml";
-
-		AntiSamy as = new AntiSamy(); // Create AntiSamy object
-		Policy p = Policy.getInstance(filename);
-		try {
-			CleanResults cr = as.scan(html, p, AntiSamy.SAX);
-			return cr.getCleanHTML();
-		} catch (Exception e) {
-			throw new Exception("Unable to perform XSS sanitization: "
-					+ e.getMessage(), e);
-		}
-	}
-
 	private static final String ALPHA_CAPS  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHA   = "abcdefghijklmnopqrstuvwxyz";
     private static final String NUM     = "0123456789";
@@ -417,4 +401,13 @@ public class StringUtils
 	public static String substringAfterLast(String str, String separator) {
 		return org.apache.commons.lang3.StringUtils.substringAfterLast(str, separator);
 	}
+
+	public static String sanitizeHTML(String html, List<SanitizerPolicy> policyParams, PolicyFactory policyFactory) {
+		for (SanitizerPolicy param : policyParams) {
+			policyFactory = (policyFactory == null) ? SANITIZER_POLICIES.get(param.name()) : policyFactory.and(SANITIZER_POLICIES.get(param.name()));
+		}
+
+		return policyFactory.sanitize(html);
+	}
+
 }
