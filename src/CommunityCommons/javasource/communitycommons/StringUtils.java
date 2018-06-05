@@ -402,12 +402,17 @@ public class StringUtils
 		return org.apache.commons.lang3.StringUtils.substringAfterLast(str, separator);
 	}
 
-	public static String sanitizeHTML(String html, List<SanitizerPolicy> policyParams, PolicyFactory policyFactory) {
+	public static String sanitizeHTML(String html, List<SanitizerPolicy> policyParams) {
+		PolicyFactory policyFactory = null;
+		
 		for (SanitizerPolicy param : policyParams) {
 			policyFactory = (policyFactory == null) ? SANITIZER_POLICIES.get(param.name()) : policyFactory.and(SANITIZER_POLICIES.get(param.name()));
 		}
 
-		return policyFactory.sanitize(html);
+		return sanitizeHTML(html, policyFactory);
 	}
 
+	public static String sanitizeHTML(String html, PolicyFactory policyFactory) {
+		return policyFactory.sanitize(html);
+	}
 }

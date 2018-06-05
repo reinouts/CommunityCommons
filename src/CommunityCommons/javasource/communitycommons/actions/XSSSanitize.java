@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.owasp.html.PolicyFactory;
 
 /**
  * Removes all potiential dangerous HTML from a string so that it can be safely displayed in a browser. 
@@ -69,8 +68,6 @@ public class XSSSanitize extends CustomJavaAction<java.lang.String>
 			return "";
 		}
 
-		PolicyFactory policyFactory = null;
-
 		List<SanitizerPolicy> policyParams = Lists.newArrayList(policy1, policy2, policy3, policy4, policy5, policy6)
 			.stream()
 			.filter(Objects::nonNull)
@@ -80,7 +77,7 @@ public class XSSSanitize extends CustomJavaAction<java.lang.String>
 			throw new MendixRuntimeException("At least one policy is required");
 		}
 
-		return communitycommons.StringUtils.sanitizeHTML(html, policyParams, policyFactory);
+		return communitycommons.StringUtils.sanitizeHTML(html, policyParams);
 		// END USER CODE
 	}
 
